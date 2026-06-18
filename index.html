@@ -846,9 +846,9 @@ function getOfflineState() {
   const day = et.getDay(); // 0=Sun 5=Fri 6=Sat
   const h   = et.getHours() + et.getMinutes() / 60;
 
-  if (day < 5)   return 'STARTING';          // Mon–Thu: pre-event
+  if (day < 5)   return 'before';             // Mon–Thu: pre-event
   if (day === 5) {                            // Friday
-    if (h < 9.5)  return 'before';           // before 9:30 AM
+    if (h < 9.5)  return 'before';           // before 9:30 AM Fri
     if (h < 11)   return 'STARTING';
     if (h < 23)   return 'AWAY';
     return 'SLEEPING';
