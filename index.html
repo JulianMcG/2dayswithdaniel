@@ -932,7 +932,14 @@ function initStream() {
       vid.play().catch(() => { vid.muted = true; vid.play().catch(() => {}); });
     } else if (typeof Hls !== 'undefined' && Hls.isSupported()) {
       if (vid._hls) vid._hls.destroy();
-      const hls = new Hls({ liveSyncDurationCount: 3, liveMaxLatencyDurationCount: 10 });
+      const hls = new Hls({
+        liveSyncDurationCount: 5,
+        liveMaxLatencyDurationCount: 15,
+        maxBufferHole: 0.5,
+        nudgeOffset: 0.1,
+        nudgeMaxRetry: 5,
+        enableWorker: true,
+      });
       vid._hls = hls;
       hls.loadSource(CF_HLS_URL);
       hls.attachMedia(vid);
