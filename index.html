@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2 Days With Daniel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --w:   #d4d2cb;   /* main text — warm off-white phosphor  */
+  --wb:  #f2f0e8;   /* bright white                         */
+  --wd:  #787670;   /* dim text                             */
+  --wdd: #3a3a36;   /* very dim / borders                   */
+  --bg:  #060606;   /* screen background                    */
+  --fs:  clamp(15px, 2vh, 22px);     /* base font size      */
+  --glow-soft: 0 0 6px rgba(215,213,205,0.26), 0 0 16px rgba(215,213,205,0.09);
+  --glow-bright: 0 0 8px rgba(242,240,232,0.48), 0 0 22px rgba(242,240,232,0.18);
+}
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #000;
+  font-family: 'VT323', monospace;
+}
+
+/* ═══════════════════════════════════════
+   MONITOR — full viewport
+═══════════════════════════════════════ */
+.monitor {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  background:
+    repeating-linear-gradient(0deg,  transparent, transparent 3px, rgba(0,0,0,0.02) 3px, rgba(0,0,0,0.02) 4px),
+    repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(0,0,0,0.02) 3px, rgba(0,0,0,0.02) 4px),
+    linear-gradient(163deg, #343434 0%, #262626 12%, #1d1d1d 30%, #181818 52%, #1f1f1f 72%, #2a2a2a 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.055),
+    inset 5px 5px 14px rgba(255,255,255,0.02),
+    inset -5px -5px 14px rgba(0,0,0,0.55);
+}
+.monitor::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(150deg,
+    rgba(255,255,255,0.065) 0%, rgba(255,255,255,0.018) 14%,
+    transparent 38%, rgba(0,0,0,0.06) 72%, rgba(0,0,0,0.24) 100%);
+  pointer-events: none; z-index: 2;
+}
+/* corner screws — positioned via individual classes */
+.corner-screw {
+  position: absolute;
+  width: clamp(13px, 1.6vh, 20px);
+  height: clamp(13px, 1.6vh, 20px);
+  opacity: 0.28;
+  pointer-events: none;
+  z-index: 4;
+}
+.corner-screw img { width: 100%; height: 100%; display: block; }
+.cs-tl { top: 11px;  left: 11px;  transform: rotate(23deg);  }
+.cs-tr { top: 11px;  right: 11px; transform: rotate(151deg); }
+.cs-bl { bottom: 11px; left: 11px;  transform: rotate(78deg);  }
+.cs-br { bottom: 11px; right: 11px; transform: rotate(214deg); }
+.monitor-inner {
+  flex: 1; display: flex; flex-direction: column;
+  position: relative; z-index: 1; min-height: 0;
+}
+
+/* ═══ BEZEL TOP ════════════════════════ */
+.bezel-top {
+  flex-shrink: 0;
+  height: clamp(50px, 7vh, 80px);
+  background: linear-gradient(180deg, #242424 0%, #1e1e1e 45%, #191919 100%);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 clamp(22px, 3.2vw, 56px);
+  border-bottom: 2px solid #0b0b0b;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Scratched plastic texture — bezel top only */
+.bezel-top::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url('istockphoto-2181398403-612x612.jpg') center/cover;
+  opacity: 0.10;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bezel-top::after {
+  content: '';
+  position: absolute; bottom: -1px; left: 5%; right: 5%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #252525 20%, #252525 80%, transparent);
+  z-index: 1;
+}
+
+/* Inset logo — recessed into plastic */
+.bezel-logo {
+  position: relative; z-index: 2;
+  background: #111;
+  border-radius: 5px;
+  padding: clamp(4px, 0.6vh, 8px) clamp(10px, 1.4vw, 20px);
+  border: 1px solid #0a0a0a;
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,0.95),
+    inset 0 1px 3px rgba(0,0,0,0.8),
+    inset 1px 0 2px rgba(0,0,0,0.5),
+    inset -1px 0 2px rgba(0,0,0,0.5),
+    0 1px 0 rgba(255,255,255,0.05);
+}
+
+.bezel-logo img {
+  height: clamp(22px, 3.4vh, 40px);
+  display: block;
+  filter:
+    brightness(0.82) saturate(0.90)
+    drop-shadow(0 1px 3px rgba(0,0,0,0.95))
+    drop-shadow(0 0 1px rgba(0,0,0,0.6));
+}
+.bezel-right { display: flex; align-items: center; gap: clamp(14px, 2.2vw, 32px); position: relative; z-index: 2; }
+.vents { display: flex; gap: 5px; align-items: center; }
+.vent  {
+  width: 2px; height: clamp(16px, 2.8vh, 28px);
+  background: #0d0d0d;
+  box-shadow: inset 1px 0 0 rgba(255,255,255,0.03), 1px 0 0 rgba(0,0,0,0.95);
+}
+.bezel-tag {
+  font-size: clamp(11px, 1.3vw, 17px);
+  letter-spacing: 2.5px; text-transform: uppercase;
+  background: linear-gradient(180deg, #636360 0%, #424240 55%, #525250 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter:
+    drop-shadow(0 1px 0 rgba(255,255,255,0.11))
+    drop-shadow(0 -1px 0 rgba(0,0,0,0.65));
+}
+
+/* ═══ SCREEN HOUSING ══════════════════ */
+.screen-housing {
+  flex: 1; min-height: 0;
+  background: linear-gradient(90deg, #0e0e0e, #0b0b0b 50%, #0e0e0e);
+  padding: 0 clamp(18px, 2.8vw, 58px);
+  display: flex; flex-direction: column;
+  position: relative;
+}
+
+/* Texture on side strips only — screen-frame sits on top and covers center */
+.screen-housing::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url('istockphoto-2181398403-612x612.jpg') center/cover;
+  opacity: 0.09;
+  pointer-events: none;
+  z-index: 0;
+}
+.screen-frame {
+  flex: 1; min-height: 0;
+  background: #090909;
+  border-top: 4px solid #060606;
+  border-bottom: 4px solid #060606;
+  padding: clamp(10px, 1.6vh, 22px);
+  display: flex;
+  box-shadow:
+    inset 0 0 70px rgba(0,0,0,0.98),
+    inset 0 5px 18px rgba(0,0,0,1),
+    inset 0 -4px 10px rgba(0,0,0,0.9);
+}
+
+/* ═══ CRT ═════════════════════════════ */
+.crt {
+  flex: 1; min-height: 0;
+  position: relative;
+  background: var(--bg);
+  border-radius: 5px;
+  overflow: hidden;
+  /* White-phosphor screen glow */
+  box-shadow:
+    0 0 35px rgba(210,208,200,0.10),
+    0 0 90px rgba(210,208,200,0.03),
+    inset 0 0 120px rgba(0,0,0,0.35);
+}
+/* Scanlines */
+.crt::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent 0px, transparent 2px, rgba(0,0,0,0.14) 2px, rgba(0,0,0,0.14) 4px
+  );
+  pointer-events: none; z-index: 30;
+}
+/* Glare + vignette */
+.crt::after {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 26% 17%, rgba(255,255,255,0.022) 0%, transparent 46%),
+    radial-gradient(ellipse at center, transparent 42%, rgba(0,0,0,0.6) 100%);
+  pointer-events: none; z-index: 29;
+}
+@keyframes flicker { 0%,90%,100%{opacity:1} 92%{opacity:0.91} 95%{opacity:0.97} }
+.crt { animation: flicker 13s 7s infinite; }
+
+.screen {
+  position: absolute; inset: 0; z-index: 10;
+  display: flex; flex-direction: column;
+  color: var(--w);
+  text-shadow: var(--glow-soft);
+}
+
+/* Brighter glow on highlighted text */
+.boot-log .hi, .login-lines .hi,
+.login-prompt-row .ps, .login-prompt-row input,
+.cmsg .uid, .chat-in .ps, .sbar,
+.live-dot, .sect-label {
+  text-shadow: var(--glow-bright);
+}
+
+/* ═══════════════════════════════════════
+   PHASE 1 — POST boot scroll
+═══════════════════════════════════════ */
+.phase1 {
+  flex: 1; display: flex; flex-direction: column;
+  padding: clamp(10px, 1.8vh, 20px) clamp(14px, 2vw, 30px);
+  overflow: hidden;
+}
+
+
+.boot-logo-wrap {
+  flex-shrink: 0;
+  display: flex; justify-content: flex-start;
+  padding: clamp(6px, 1.2vh, 12px) 0 clamp(8px, 1.5vh, 16px);
+}
+
+.boot-logo-img {
+  height: clamp(32px, 6vh, 60px);
+  display: block;
+  filter:
+    brightness(0) invert(1)
+    drop-shadow(0 0 8px rgba(255,255,255,0.7))
+    drop-shadow(0 0 22px rgba(255,255,255,0.28));
+}
+
+.boot-hr {
+  flex-shrink: 0;
+  border: none; border-top: 1px solid var(--wdd);
+  margin-bottom: clamp(6px, 1.1vh, 12px);
+}
+
+.boot-log {
+  flex: 1; overflow: hidden;
+  font-size: var(--fs);
+  line-height: 1.52;
+}
+.boot-log .hi  { color: var(--wb); }
+.boot-log .dim { color: var(--w);  }
+.boot-log .lo  { color: var(--wdd); text-shadow: none; }
+.boot-log div  { white-space: nowrap; overflow: hidden; }
+
+/* ═══════════════════════════════════════
+   PHASE 2 — Login screen (DOS prompt)
+═══════════════════════════════════════ */
+.phase2 {
+  display: none;
+  flex: 1; flex-direction: column;
+  padding: clamp(10px, 1.8vh, 20px) clamp(14px, 2vw, 30px);
+  overflow: hidden;
+}
+
+.login-lines {
+  font-size: var(--fs);
+  line-height: 1.52;
+  color: var(--w);
+}
+.login-lines div { white-space: pre; }
+.login-lines .hi  { color: var(--wb); }
+.login-lines .dim { color: var(--wd); }
+
+.login-prompt-row {
+  display: flex; align-items: baseline;
+  font-size: var(--fs);
+  margin-top: 2px;
+}
+.login-prompt-row .ps {
+  color: var(--wb);
+  white-space: pre;
+  letter-spacing: 0;
+}
+.login-prompt-row input {
+  background: transparent; border: none; outline: none;
+  color: var(--wb);
+  font-family: 'VT323', monospace;
+  font-size: inherit;
+  caret-color: var(--wb);
+  text-shadow: 0 0 4px rgba(255,255,255,0.28);
+  width: clamp(120px, 22vw, 340px);
+  letter-spacing: 1px;
+}
+.login-err {
+  font-size: var(--fs);
+  color: #cc3333;
+  margin-top: 4px;
+  display: none;
+  text-shadow: none;
+}
+
+/* ═══════════════════════════════════════
+   MAIN SCREEN
+═══════════════════════════════════════ */
+.main {
+  display: none; flex: 1; flex-direction: column;
+  padding: clamp(6px, 1.1vh, 14px) clamp(14px, 2vw, 30px) clamp(4px, 0.7vh, 10px);
+  min-height: 0;
+}
+.main.on { display: flex; }
+
+.sbar {
+  flex-shrink: 0;
+  font-size: clamp(13px, 1.55vh, 17px);
+  color: var(--wd);
+  display: flex; justify-content: space-between; align-items: center;
+  padding-bottom: clamp(2px, 0.4vh, 6px);
+  border-bottom: 1px solid var(--wdd);
+}
+
+.stream-sect { flex-shrink: 0; padding-top: clamp(4px, 0.7vh, 9px); }
+.sect-label {
+  font-size: clamp(13px, 1.55vh, 17px);
+  color: var(--wd);
+  margin-bottom: clamp(3px, 0.5vh, 6px);
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+.live-dot { color: var(--wb); animation: blink 2s step-end infinite; }
+
+.yt-wrap {
+  position: relative;
+  display: inline-block;
+  height: clamp(150px, 40vh, 430px);
+  aspect-ratio: 16 / 9;
+  vertical-align: top;
+}
+.yt-embed {
+  display: block; width: 100%; height: 100%;
+  background: #000;
+  border: 1px solid var(--wdd);
+  position: relative; z-index: 1;
+}
+.yt-overlay {
+  position: absolute; inset: 0;
+  z-index: 5;
+  cursor: default;
+}
+.twitch-glow {
+  position: absolute;
+  inset: -28px;
+  z-index: 0;
+  filter: blur(26px);
+  opacity: 0.55;
+  pointer-events: none;
+}
+.twitch-glow video { width: 100%; height: 100%; display: block; object-fit: cover; }
+.stream-video {
+  position: absolute; inset: 0; z-index: 1;
+  width: 100%; height: 100%;
+  display: block; background: #000;
+  object-fit: contain;
+  object-position: center center;
+}
+
+.offline-overlay {
+  position: absolute; inset: 0; z-index: 4;
+  background: var(--bg);
+  display: none;
+  align-items: center; justify-content: center;
+  border: 1px solid var(--wdd);
+  overflow: hidden;
+}
+.offline-overlay.active { display: flex; }
+.offline-video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.chat-sect {
+  flex: 1; display: flex; flex-direction: column;
+  min-height: 0; overflow: hidden;
+  padding-top: clamp(3px, 0.5vh, 7px);
+}
+.chat-log {
+  flex: 1; display: flex; flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden; min-height: 0;
+}
+.cmsg {
+  font-size: clamp(14px, 1.7vh, 19px);
+  line-height: 1.45;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  flex-shrink: 0;
+  color: var(--wd);
+}
+.cmsg .uid  { color: var(--wb); }
+.cmsg .body { color: var(--w); }
+
+.chat-in {
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 5px;
+  padding-top: clamp(3px, 0.5vh, 7px);
+  border-top: 1px solid var(--wdd);
+  font-size: clamp(14px, 1.7vh, 19px);
+  margin-top: clamp(1px, 0.3vh, 4px);
+}
+.chat-in .ps { color: var(--wb); }
+.chat-in input {
+  flex: 1; background: transparent; border: none; outline: none;
+  color: var(--w); font-family: 'VT323', monospace;
+  font-size: inherit; caret-color: var(--wb);
+}
+.chat-in input::placeholder { color: var(--wdd); }
+
+/* ═══ BEZEL BOTTOM ════════════════════ */
+.bezel-bot {
+  flex-shrink: 0;
+  height: clamp(54px, 7.5vh, 86px);
+  background: linear-gradient(180deg, #191919 0%, #1d1d1d 55%, #222 100%);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 clamp(22px, 3.2vw, 56px);
+  border-top: 2px solid #0b0b0b;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+.bezel-bot::before {
+  content: '';
+  position: absolute; top: -1px; left: 5%; right: 5%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #252525 20%, #252525 80%, transparent);
+  z-index: 1;
+}
+
+/* Scratched plastic texture — bezel bottom only */
+.bezel-bot::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: url('istockphoto-2181398403-612x612.jpg') center/cover;
+  opacity: 0.10;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pwr { display: flex; align-items: center; gap: clamp(9px, 1.3vw, 16px); position: relative; z-index: 2; }
+.pwr-btn {
+  width: clamp(22px, 2.8vh, 32px); height: clamp(22px, 2.8vh, 32px);
+  border-radius: 50%;
+  background: linear-gradient(148deg, #2a2a2a, #111);
+  border: 1.5px solid #303030;
+  box-shadow:
+    0 5px 12px rgba(0,0,0,0.85), 0 2px 5px rgba(0,0,0,0.55),
+    inset 0 1px 0 rgba(255,255,255,0.075), inset 0 -1px 0 rgba(0,0,0,0.55);
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+.pwr-btn.pressed {
+  transform: scale(0.87) translateY(1px);
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.85), 0 1px 2px rgba(0,0,0,0.5),
+    inset 0 3px 6px rgba(0,0,0,0.7), inset 0 -1px 0 rgba(255,255,255,0.02);
+}
+.pwr-btn::before {
+  content: ''; position: absolute; inset: 5px;
+  border-radius: 50%; border: 1px solid rgba(255,255,255,0.05);
+}
+@keyframes led {
+  0%,100% { box-shadow: 0 0 8px #00ff41, 0 0 20px rgba(0,255,65,0.75), 0 0 36px rgba(0,255,65,0.28); opacity:1; }
+  50%      { box-shadow: 0 0 4px #00ff41, 0 0 11px rgba(0,255,65,0.4); opacity:0.68; }
+}
+.pwr-led {
+  width: clamp(7px, 1vh, 12px); height: clamp(7px, 1vh, 12px);
+  border-radius: 50%; background: #00ff41;
+  animation: led 3.4s ease-in-out infinite;
+  transition: background 0.3s, box-shadow 0.3s;
+}
+.pwr-led.dim {
+  animation: none;
+  background: #011401;
+  box-shadow: none;
+}
+
+@keyframes crt-off {
+  0%   { transform: scaleY(1);     filter: brightness(1);   opacity: 1; }
+  7%   { transform: scaleY(1);     filter: brightness(2);   opacity: 1; }
+  22%  { transform: scaleY(0.014); filter: brightness(4.5); opacity: 1; }
+  48%  { transform: scaleY(0.008); filter: brightness(2.5); opacity: 1; }
+  70%  { transform: scaleY(0.006); filter: brightness(1);   opacity: 0.7; }
+  100% { transform: scaleY(0);     filter: brightness(0);   opacity: 0; }
+}
+@keyframes crt-on {
+  0%   { transform: scaleY(0);     filter: brightness(0);   opacity: 1; }
+  22%  { transform: scaleY(0.008); filter: brightness(4); }
+  45%  { transform: scaleY(0.014); filter: brightness(2.5); }
+  74%  { transform: scaleY(1);     filter: brightness(1.6); }
+  100% { transform: scaleY(1);     filter: brightness(1); }
+}
+.crt.turning-off { animation: crt-off 0.42s ease-in  forwards; }
+.crt.turning-on  { animation: crt-on  0.50s ease-out forwards; }
+.crt.crt-off     { animation: none; transform: scaleY(0); opacity: 0; }
+
+.brand-plate {
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  position: relative; z-index: 2;
+  /* emboss: light catch on bottom edge, shadow on top — debossed into plastic */
+  filter:
+    drop-shadow(0 1px 0 rgba(255,255,255,0.11))
+    drop-shadow(0 -1px 0 rgba(0,0,0,0.65));
+}
+.brand-name {
+  font-size: clamp(10px, 1.3vw, 17px);
+  letter-spacing: 4px; text-transform: uppercase;
+  background: linear-gradient(180deg, #636360 0%, #424240 55%, #525250 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.brand-model {
+  font-size: clamp(8px, 0.9vw, 13px);
+  letter-spacing: 3px; text-transform: uppercase;
+  background: linear-gradient(180deg, #484845 0%, #2e2e2c 60%, #3a3a38 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.bot-right { display: flex; align-items: center; gap: clamp(14px, 2vw, 28px); position: relative; z-index: 2; }
+.bot-vents { display: flex; flex-direction: column; gap: 4px; }
+.bvent { width: clamp(18px, 2.2vw, 30px); height: 3px; background: #0d0d0d; border-top: 1px solid rgba(255,255,255,0.03); border-radius: 1px; }
+.osd { display: flex; gap: 7px; }
+.osd-btn {
+  width: clamp(11px, 1.3vw, 18px); height: clamp(20px, 2.8vh, 32px);
+  background: linear-gradient(180deg, #202020, #141414);
+  border: 1px solid #282828; border-radius: 3px;
+  box-shadow: 0 3px 7px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+/* ═══════════════════════════════════════
+   MOBILE / RESPONSIVE
+═══════════════════════════════════════ */
+@media (max-width: 700px) {
+  /* Bezels: shorter on small screens */
+  .bezel-top {
+    height: clamp(36px, 9vw, 52px);
+    padding: 0 clamp(10px, 3vw, 18px);
+  }
+  .bezel-bot {
+    height: clamp(40px, 10vw, 58px);
+    padding: 0 clamp(10px, 3vw, 18px);
+  }
+
+  /* Screws: smaller, positioned safely inside bezels */
+  .corner-screw { width: 9px; height: 9px; opacity: 0.18; }
+  .cs-tl { top: 5px;    left: 5px; }
+  .cs-tr { top: 5px;    right: 5px; }
+  .cs-bl { bottom: 5px; left: 5px; }
+  .cs-br { bottom: 5px; right: 5px; }
+
+  /* Hide decorative clutter that clutters small screens */
+  .vents, .bezel-tag, .bot-vents, .osd { display: none; }
+  .brand-model { display: none; }
+
+  /* Bezel logo: smaller */
+  .bezel-logo { padding: 3px 8px; }
+  .bezel-logo img { height: clamp(16px, 4.5vw, 26px); }
+
+  /* Screen housing: less side padding */
+  .screen-housing { padding: 0 clamp(4px, 1.5vw, 10px); }
+  .screen-frame   { padding: clamp(4px, 1.2vw, 10px); }
+
+  /* Boot & login screens: tighter padding, smaller font for ASCII art to fit */
+  .phase1, .phase2 { padding: clamp(5px, 1.5vw, 10px); }
+  .boot-log {
+    font-size: clamp(7px, 1.7vw, 13px);
+    line-height: 1.2;
+  }
+  .login-lines { font-size: clamp(11px, 3vw, 16px); }
+  .login-prompt-row { font-size: clamp(11px, 3vw, 16px); }
+  .login-err { font-size: clamp(11px, 3vw, 16px); }
+
+  /* Video: full-width block, height from aspect-ratio */
+  .yt-wrap {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 40vh;
+  }
+
+  /* Main screen */
+  .main {
+    padding: clamp(3px, 1vw, 8px) clamp(5px, 1.5vw, 10px);
+    gap: 0;
+  }
+  .sbar     { font-size: clamp(9px, 2.2vw, 13px); padding-bottom: 2px; }
+  .sect-label { font-size: clamp(9px, 2.2vw, 13px); margin-bottom: 2px; }
+  .stream-sect { padding-top: clamp(2px, 0.5vw, 5px); }
+  .chat-sect  { padding-top: clamp(2px, 0.5vw, 5px); }
+  .cmsg       { font-size: clamp(11px, 3vw, 15px); }
+  .chat-in    { font-size: clamp(11px, 3vw, 15px); padding-top: 3px; }
+}
+
+/* Landscape phones: video must not consume the full screen */
+@media (orientation: landscape) and (max-height: 500px) {
+  .bezel-top, .bezel-bot { height: 32px; }
+  .vents, .bezel-tag, .bot-vents, .osd, .brand-model { display: none; }
+  .corner-screw { width: 8px; height: 8px; }
+  .cs-tl { top: 3px; left: 3px; }
+  .cs-tr { top: 3px; right: 3px; }
+  .cs-bl { bottom: 3px; left: 3px; }
+  .cs-br { bottom: 3px; right: 3px; }
+  .yt-wrap { max-height: 52vh; }
+  .screen-housing { padding: 0 4px; }
+  .screen-frame { padding: 4px; }
+}
+</style>
+</head>
+<body>
+
+<div class="monitor">
+  <div class="corner-screw cs-tl"><img src="screw.png" alt=""></div>
+  <div class="corner-screw cs-tr"><img src="screw.png" alt=""></div>
+  <div class="corner-screw cs-bl"><img src="screw.png" alt=""></div>
+  <div class="corner-screw cs-br"><img src="screw.png" alt=""></div>
+  <div class="monitor-inner">
+
+    <!-- BEZEL TOP -->
+    <div class="bezel-top">
+      <div class="bezel-logo"><img src="logobezel.png" alt="Alston Labs"></div>
+      <div class="bezel-right">
+        <div class="vents">
+          <div class="vent"></div><div class="vent"></div><div class="vent"></div>
+          <div class="vent"></div><div class="vent"></div><div class="vent"></div>
+          <div class="vent"></div><div class="vent"></div><div class="vent"></div>
+        </div>
+<span class="bezel-tag">ALT-7 // MK.II</span>
+      </div>
+    </div>
+
+    <!-- SCREEN HOUSING -->
+    <div class="screen-housing">
+      <div class="screen-frame">
+        <div class="crt" id="crt">
+          <div class="screen">
+
+            <!-- PHASE 1: POST boot -->
+            <div class="phase1" id="phase1">
+              <div class="boot-logo-wrap">
+                <img src="logowhite.png" alt="Alston Labs" class="boot-logo-img">
+              </div>
+              <hr class="boot-hr">
+              <div class="boot-log" id="bootLog"></div>
+            </div>
+
+            <!-- PHASE 2: Login -->
+            <div class="phase2" id="phase2">
+              <div class="login-lines" id="loginLines"></div>
+              <div class="login-prompt-row">
+                <span class="ps">C:\ALSTON&gt;&nbsp;</span>
+                <input
+                  type="text" id="loginInput"
+                  autocomplete="off" autocorrect="off"
+                  autocapitalize="off" spellcheck="false"
+                  maxlength="30">
+              </div>
+              <div class="login-err" id="loginErr">Bad command or file name. Subject not recognized.</div>
+            </div>
+
+            <!-- MAIN -->
+            <div class="main" id="main">
+              <div class="sbar">
+                <span>ALSTON LABS // MONITORING v4.2.1 // CH-07</span>
+                <span id="clock"></span>
+              </div>
+              <div class="stream-sect">
+                <div class="sect-label">&gt; LIVE FEED -- SUBJECT: DANIEL -- [<span class="live-dot">*</span>] ACTIVE -- <span id="viewerCount">--</span> WATCHING</div>
+                <div class="yt-wrap">
+                  <div id="streamGlow" class="twitch-glow">
+                    <video id="glowVideo" muted playsinline></video>
+                  </div>
+                  <video id="streamVideo" class="stream-video" playsinline></video>
+                  <div class="offline-overlay" id="offlineOverlay">
+                    <video id="offlineVideo" class="offline-video" muted loop playsinline></video>
+                  </div>
+                </div>
+              </div>
+              <div class="chat-sect">
+                <div class="sect-label">&gt; OBSERVER CHAT -- LIVE -- ANONYMOUS</div>
+                <div class="chat-log" id="chatLog"></div>
+                <div class="chat-in">
+                  <span class="ps">&gt;</span>
+                  <input
+                    type="text" id="chatInput"
+                    autocomplete="off" autocorrect="off"
+                    autocapitalize="off" spellcheck="false"
+                    placeholder="type message and press ENTER"
+                    maxlength="200">
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BEZEL BOTTOM -->
+    <div class="bezel-bot">
+      <div class="pwr">
+        <div class="pwr-btn"></div>
+        <div class="pwr-led"></div>
+      </div>
+      <div class="brand-plate">
+        <div class="brand-name">Alston Labs</div>
+        <div class="brand-model">ALT-7 Research Terminal</div>
+      </div>
+      <div class="bot-right">
+        <div class="bot-vents">
+          <div class="bvent"></div><div class="bvent"></div>
+          <div class="bvent"></div><div class="bvent"></div>
+        </div>
+        <div class="osd">
+          <div class="osd-btn"></div><div class="osd-btn"></div>
+          <div class="osd-btn"></div><div class="osd-btn"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Fan audio: autoplay+muted is universally allowed; we unmute on first interaction -->
+<audio id="fanAudio" autoplay muted preload="auto" src="computerfan.mp3" style="display:none"></audio>
+
+<script type="module">
+import { initializeApp }     from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+import { getFirestore, collection, addDoc, query,
+         orderBy, limit, onSnapshot, serverTimestamp }
+  from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+import { getDatabase, ref, push, set, onValue, onDisconnect }
+  from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+/* ── CONFIGURE THESE TWO ─────────────────────── */
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyB9qqa3Vw9oyjqTHBp20_eHS8uGCSE_ByY",
+  authDomain:        "dayswithdaniel-8ba59.firebaseapp.com",
+  projectId:         "dayswithdaniel-8ba59",
+  storageBucket:     "dayswithdaniel-8ba59.firebasestorage.app",
+  messagingSenderId: "812386772505",
+  appId:             "1:812386772505:web:d23bef3ce65cacfde66c88",
+  databaseURL:       "https://dayswithdaniel-8ba59-default-rtdb.firebaseio.com"
+};
+const CF_HLS_URL = 'https://customer-78aldaawq2zdfv2p.cloudflarestream.com/91e65f5238ce82d9d6ee8c8ea5707b13/manifest/video.m3u8';
+/* ──────────────────────────────────────────────── */
+
+function getUID() {
+  let id = localStorage.getItem('alston_uid');
+  if (!id) {
+    id = 'OBS' + Math.random().toString(36).slice(2, 6).toUpperCase();
+    localStorage.setItem('alston_uid', id);
+  }
+  return id;
+}
+const MY_UID = getUID();
+
+let db = null, rtdb = null, streamVideoEl = null;
+try {
+  const app = initializeApp(FIREBASE_CONFIG);
+  db   = getFirestore(app);
+  rtdb = getDatabase(app);
+} catch(e) {}
+
+/* ── Boot lines ────────────────────────────────── */
+const BOOT = [
+  ['ALSTON LABS CORP. -- ALT-7 RESEARCH TERMINAL v4.2.1', 'hi'],
+  ['Copyright (C) 1989-2024 Alston Labs Inc. All rights reserved.', 'dim'],
+  ['', ''],
+  ['Running power-on self test...', 'dim'],
+  ['  CPU integrity ....................................... PASS', 'dim'],
+  ['  Memory [512K] ....................................... PASS', 'dim'],
+  ['  Display controller .................................. PASS', 'dim'],
+  ['  Secure enclave ...................................... PASS', 'dim'],
+  ['  Network interface ................................... PASS', 'dim'],
+  ['', ''],
+  ['Loading research kernel v4.2.1...', 'hi'],
+  ['Establishing encrypted uplink...', 'dim'],
+  ['Connecting to Firebase sync node...', 'dim'],
+  ['  Realtime DB ............................. CONNECTED [12ms]', 'hi'],
+  ['', ''],
+  ['Experiment:  Social Confinement Study -- Series 7', 'hi'],
+  ['Subject:     [CLASSIFIED]', 'dim'],
+  ['Duration:    48:00:00', 'dim'],
+  ['Access tier: Level 2 -- Observer', 'dim'],
+  ['', ''],
+  ['Boot complete.', 'hi'],
+];
+
+function runBoot() {
+  const log = document.getElementById('bootLog');
+  let delay = 0;
+  BOOT.forEach(([text, cls], i) => {
+    delay += i === 0 ? 80 : 130;
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.textContent = text;
+      if (cls === 'hi')  el.style.color = 'var(--wb)';
+      if (cls === 'dim') el.style.color = 'var(--w)';
+      log.appendChild(el);
+    }, delay);
+  });
+  setTimeout(() => { playBeep(); }, delay);
+  setTimeout(enterMain, delay + 1800);
+}
+
+document.getElementById('crt').addEventListener('click', () => {
+  if (document.getElementById('main').classList.contains('on'))
+    document.getElementById('chatInput').focus();
+});
+
+function enterMain() {
+  stopFan();
+  document.getElementById('phase1').style.display = 'none';
+  document.getElementById('main').classList.add('on');
+  tickClock();
+  setInterval(tickClock, 1000);
+  initChat();
+  trackViewer();
+  initStream();
+  document.getElementById('chatInput').focus();
+}
+
+/* ── Offline state schedule (Eastern Time) ──────── */
+function getOfflineState() {
+  const et  = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/New_York' }));
+  const day = et.getDay(); // 0=Sun 5=Fri 6=Sat
+  const h   = et.getHours() + et.getMinutes() / 60;
+
+  if (day < 5)   return 'STARTING';          // Mon–Thu: pre-event
+  if (day === 5) {                            // Friday
+    if (h < 11)  return 'STARTING';
+    if (h < 23)  return 'AWAY';
+    return 'SLEEPING';
+  }
+  if (day === 6) {                            // Saturday
+    if (h < 11)  return 'SLEEPING';
+    if (h < 23)  return 'AWAY';
+    return 'ENDED';
+  }
+  // Sunday
+  if (h < 11)   return 'ENDED';
+  if (h < 23)   return 'AWAY';
+  return 'ENDED';
+}
+
+function setOfflineVideo(state) {
+  const vid = document.getElementById('offlineVideo');
+  if (!vid || vid.dataset.state === state) return;
+  vid.dataset.state = state;
+  vid.src = state + '.mp4';
+  vid.load();
+  vid.play().catch(() => {});
+}
+
+function initStream() {
+  const offlineEl = document.getElementById('offlineOverlay');
+  const glowEl    = document.getElementById('streamGlow');
+  const video     = document.getElementById('streamVideo');
+  const glowVideo = document.getElementById('glowVideo');
+  streamVideoEl   = video;
+
+  // Start hidden — shown when stream comes online
+  offlineEl.classList.add('active');
+  glowEl.style.display = 'none';
+  setOfflineVideo(getOfflineState());
+
+  // Re-check state every 30s in case time crosses a boundary while offline
+  setInterval(() => {
+    if (offlineEl.classList.contains('active')) setOfflineVideo(getOfflineState());
+  }, 30000);
+
+  let retryTimer = null;
+  let stallTimer = null;
+
+  function armWatchdog() {
+    clearTimeout(stallTimer);
+    stallTimer = setTimeout(() => { if (!video.paused) goOffline(); }, 10000);
+  }
+
+  function goOnline() {
+    if (retryTimer) { clearTimeout(retryTimer); retryTimer = null; }
+    offlineEl.classList.remove('active');
+    glowEl.style.display = '';
+    armWatchdog();
+  }
+  function goOffline() {
+    clearTimeout(stallTimer); stallTimer = null;
+    offlineEl.classList.add('active');
+    glowEl.style.display = 'none';
+    setOfflineVideo(getOfflineState());
+    if (!retryTimer) retryTimer = setTimeout(tryLoad, 8000);
+  }
+
+  // Watchdog: reset on every new frame, fire if no progress for 10s
+  video.addEventListener('timeupdate', armWatchdog);
+  video.addEventListener('pause',      () => { clearTimeout(stallTimer); stallTimer = null; });
+
+  // Go online only when actual frames start rendering
+  video.addEventListener('playing', goOnline);
+
+  function attach(vid, muted) {
+    vid.muted = muted;
+    if (vid.canPlayType('application/vnd.apple.mpegurl')) {
+      // Safari — native HLS support
+      if (!muted && !vid._setupDone) {
+        vid._setupDone = true;
+        vid.addEventListener('error', goOffline);
+      }
+      vid.src = CF_HLS_URL;
+      vid.load();
+      vid.play().catch(() => { vid.muted = true; vid.play().catch(() => {}); });
+    } else if (typeof Hls !== 'undefined' && Hls.isSupported()) {
+      if (vid._hls) vid._hls.destroy();
+      const hls = new Hls({ liveSyncDurationCount: 3, liveMaxLatencyDurationCount: 10 });
+      vid._hls = hls;
+      hls.loadSource(CF_HLS_URL);
+      hls.attachMedia(vid);
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        vid.play().catch(() => { vid.muted = true; vid.play().catch(() => {}); });
+      });
+      if (!muted) {
+        hls.on(Hls.Events.ERROR, (_, d) => { if (d.fatal) goOffline(); });
+      }
+    }
+  }
+
+  function tryLoad() {
+    retryTimer = null;
+    attach(video, false);
+    attach(glowVideo, true);
+  }
+
+  tryLoad();
+}
+
+function trackViewer() {
+  if (!rtdb) return;
+  try {
+    const viewersRef = ref(rtdb, 'viewers');
+    const myRef = push(viewersRef);
+    set(myRef, true);
+    onDisconnect(myRef).remove();
+    onValue(viewersRef, snap => {
+      const count = snap.exists() ? Object.keys(snap.val()).length : 0;
+      const el = document.getElementById('viewerCount');
+      if (el) el.textContent = count;
+    });
+  } catch(e) {}
+}
+
+function tickClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toISOString().replace('T', ' ').split('.')[0] + ' UTC | ' + MY_UID;
+}
+
+/* ── Slur filter ───────────────────────────── */
+const BLOCKED = [
+  'nigger','nigga','nigg','spic','chink','gook','kike','wetback',
+  'raghead','towelhead','sandnigger','beaner','zipperhead',
+  'greaseball','wop','dago','heeb','hymie','redskin','squaw',
+  'injun','paki','slope','slant','faggot','tranny','coon',
+];
+function containsSlur(text) {
+  const n = text.toLowerCase().replace(/[^a-z]/g, '');
+  return BLOCKED.some(w => n.includes(w));
+}
+
+function initChat() {
+  const log = document.getElementById('chatLog');
+  const inp = document.getElementById('chatInput');
+
+  if (db) {
+    onSnapshot(
+      query(collection(db, 'chat'), orderBy('ts', 'desc'), limit(80)),
+      snap => {
+        const msgs = [];
+        snap.forEach(d => msgs.push(d.data()));
+        msgs.reverse();
+        log.innerHTML = '';
+        msgs.forEach(m => {
+          const d = document.createElement('div');
+          d.className = 'cmsg';
+          d.innerHTML =
+            `<span class="uid">[${esc(m.uid)}]</span>` +
+            `<span class="body"> ${esc(m.text)}</span>`;
+          log.appendChild(d);
+        });
+      }
+    );
+  }
+
+  // Rate limiting state
+  const RATE_WINDOW = 6000;   // sliding window ms
+  const RATE_LIMIT  = 4;      // max msgs in window
+  const COOLDOWN_MS = 12000;  // cooldown duration ms
+  const MIN_GAP_MS  = 700;    // min ms between any two messages
+  let msgTimes     = [];
+  let cooldownEnd  = 0;
+  let cdInterval   = null;
+
+  function showChatNotice(text, color) {
+    const n = document.createElement('div');
+    n.className = 'cmsg';
+    n.style.color = color;
+    n.textContent = text;
+    log.appendChild(n);
+    setTimeout(() => n.remove(), 3500);
+  }
+
+  function startCooldown() {
+    inp.disabled = true;
+    if (cdInterval) clearInterval(cdInterval);
+    cdInterval = setInterval(() => {
+      const left = Math.ceil((cooldownEnd - Date.now()) / 1000);
+      if (left <= 0) {
+        clearInterval(cdInterval);
+        cdInterval = null;
+        inp.disabled = false;
+        inp.placeholder = 'type message and press ENTER';
+        inp.focus();
+      } else {
+        inp.placeholder = `cooldown — ${left}s`;
+      }
+    }, 250);
+  }
+
+  function canSend() {
+    const now = Date.now();
+    if (now < cooldownEnd) return false;
+    if (msgTimes.length && now - msgTimes[msgTimes.length - 1] < MIN_GAP_MS) return false;
+    msgTimes = msgTimes.filter(t => now - t < RATE_WINDOW);
+    if (msgTimes.length >= RATE_LIMIT) {
+      cooldownEnd = now + COOLDOWN_MS;
+      showChatNotice('-- slow down --', '#cc7700');
+      startCooldown();
+      return false;
+    }
+    msgTimes.push(now);
+    return true;
+  }
+
+  inp.addEventListener('keydown', async e => {
+    if (e.key !== 'Enter') return;
+    const t = inp.value.trim();
+    if (!t) return;
+    if (containsSlur(t)) {
+      inp.value = '';
+      showChatNotice('-- message blocked --', '#cc3333');
+      return;
+    }
+    if (!canSend()) { inp.value = ''; return; }
+    inp.value = '';
+    if (db) {
+      try {
+        await addDoc(collection(db, 'chat'), {
+          text: t.slice(0, 200), uid: MY_UID, ts: serverTimestamp()
+        });
+      } catch(_) { addLocal(MY_UID, t, log); }
+    } else {
+      addLocal(MY_UID, t, log);
+    }
+  });
+}
+
+function addLocal(uid, t, log) {
+  const d = document.createElement('div');
+  d.className = 'cmsg';
+  d.innerHTML =
+    `<span class="uid">[${esc(uid)}]</span>` +
+    `<span class="body"> ${esc(t)}</span>`;
+  log.appendChild(d);
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = String(s);
+  return d.innerHTML;
+}
+
+/* ── Audio ─────────────────────────────────── */
+const SND = {};
+let _fanVol = 0.30, _fanDone = false, _fanLooping = false;
+
+function setupAudio() {
+  SND.fan     = document.getElementById('fanAudio');
+  SND.fan.volume = 0; // will fade in on first interaction
+  SND.beep    = new Audio('beep.mp3');
+  SND.btnDown = new Audio('buttondown.mp3');
+  SND.btnUp   = new Audio('buttonup.mp3');
+  SND.btnDown.volume = 0.18;
+  SND.btnUp.volume   = 0.18;
+
+  // Loop: when fan reaches 1:15 (75s), crossfade back to 0:10
+  SND.fan.addEventListener('timeupdate', () => {
+    if (SND.fan.currentTime >= 74.8 && !_fanLooping && !_fanDone) {
+      _fanLooping = true;
+      fadeVol(SND.fan, 0, 400, () => {
+        SND.fan.currentTime = 10;
+        fadeVol(SND.fan, _fanVol, 400, () => { _fanLooping = false; });
+      });
+    }
+  });
+  SND.fan.addEventListener('ended', () => {
+    if (!_fanDone) { SND.fan.currentTime = 10; SND.fan.play().catch(() => {}); }
+  });
+}
+
+function startFan() {
+  if (!SND.fan) return;
+  // <audio autoplay muted> already started playing silently.
+  // Unmute + fade in on first user gesture (browsers always allow muted autoplay).
+  const unmute = () => {
+    if (!_fanDone) {
+      SND.fan.volume = 0;
+      SND.fan.muted = false;
+      fadeVol(SND.fan, _fanVol, 1200);
+    }
+    ['pointerdown','keydown','touchstart'].forEach(e =>
+      document.removeEventListener(e, unmute));
+  };
+  ['pointerdown','keydown','touchstart'].forEach(e =>
+    document.addEventListener(e, unmute));
+}
+
+function stopFan() {
+  if (!SND.fan) return;
+  _fanDone = true;
+  fadeVol(SND.fan, 0, 1400, () => SND.fan.pause());
+}
+
+function playBeep() {
+  if (!SND.beep) return;
+  SND.beep.currentTime = 0;
+  SND.beep.play().catch(() => {});
+}
+
+function fadeVol(audio, target, dur, cb) {
+  const start = audio.volume;
+  const steps = 18;
+  const delta = (target - start) / steps;
+  let n = 0;
+  const iv = setInterval(() => {
+    audio.volume = Math.max(0, Math.min(1, audio.volume + delta));
+    if (++n >= steps) { clearInterval(iv); if (cb) cb(); }
+  }, dur / steps);
+}
+
+/* ── Power button ──────────────────────────── */
+function initPowerBtn() {
+  const btn = document.querySelector('.pwr-btn');
+  const led = document.querySelector('.pwr-led');
+  const crt = document.getElementById('crt');
+  let screenOn = true, busy = false;
+
+  function ytCmd(cmd) {
+    if (!streamVideoEl) return;
+    streamVideoEl.muted = (cmd === 'mute');
+  }
+
+  btn.addEventListener('mousedown', () => {
+    btn.classList.add('pressed');
+    if (SND.btnDown) { SND.btnDown.currentTime = 0; SND.btnDown.play().catch(() => {}); }
+  });
+
+  btn.addEventListener('mouseleave', () => btn.classList.remove('pressed'));
+
+  btn.addEventListener('mouseup', () => {
+    btn.classList.remove('pressed');
+    if (SND.btnUp) { SND.btnUp.currentTime = 0; SND.btnUp.play().catch(() => {}); }
+    if (busy) return;
+    busy = true;
+
+    if (screenOn) {
+      screenOn = false;
+      led.classList.add('dim');
+      crt.classList.add('turning-off');
+      ytCmd('mute');
+      crt.addEventListener('animationend', () => {
+        crt.classList.remove('turning-off');
+        crt.classList.add('crt-off');
+        crt.querySelector('.screen').style.visibility = 'hidden';
+        busy = false;
+      }, { once: true });
+    } else {
+      screenOn = true;
+      crt.querySelector('.screen').style.visibility = '';
+      crt.classList.remove('crt-off');
+      crt.classList.add('turning-on');
+      led.classList.remove('dim');
+      ytCmd('unMute');
+      crt.addEventListener('animationend', () => {
+        crt.classList.remove('turning-on');
+        busy = false;
+      }, { once: true });
+    }
+  });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  setupAudio();
+  startFan();
+  initPowerBtn();
+  setTimeout(runBoot, 500);
+});
+</script>
+</body>
+</html>

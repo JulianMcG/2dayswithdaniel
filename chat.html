@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Observer">
+<meta name="theme-color" content="#000000">
+<title>Observer</title>
+<style>
+*, *::before, *::after {
+  margin: 0; padding: 0; box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: #000;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ── Auth screen ─────────────────────────── */
+#auth {
+  position: fixed; inset: 0;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 40px 32px;
+  padding-top:    calc(40px + env(safe-area-inset-top));
+  padding-bottom: calc(40px + env(safe-area-inset-bottom));
+  z-index: 100;
+}
+#auth.gone { display: none; }
+
+#auth-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #444;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+#authPw {
+  width: 100%; max-width: 320px;
+  background: #0d0d0d;
+  border: 1px solid #1e1e1e;
+  border-radius: 14px;
+  padding: 16px 20px;
+  font-size: 1rem;
+  color: #fff;
+  font-family: inherit;
+  outline: none;
+  -webkit-appearance: none;
+  text-align: center;
+  letter-spacing: 2px;
+}
+#authPw::placeholder { color: #2a2a2a; letter-spacing: 0; }
+#authPw:focus { border-color: #333; }
+
+#authBtn {
+  width: 100%; max-width: 320px;
+  background: #fff;
+  color: #000;
+  border: none;
+  border-radius: 14px;
+  padding: 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+#authBtn:active { opacity: 0.85; }
+
+#authErr {
+  font-size: 0.85rem;
+  color: #ff4040;
+  display: none;
+}
+
+/* ── Main app ────────────────────────────── */
+#app {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding-top: env(safe-area-inset-top);
+}
+#app.gone { display: none; }
+
+/* Header */
+#hdr {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  height: 52px;
+  border-bottom: 1px solid #111;
+  flex-shrink: 0;
+}
+
+#stats { display: flex; gap: 20px; align-items: center; }
+.stat  { display: flex; align-items: baseline; gap: 4px; }
+.stat-val { font-size: 1rem; font-weight: 700; color: #fff; }
+.stat-lbl { font-size: 0.7rem; color: #444; margin-left: 1px; }
+
+#clearBtn {
+  background: transparent;
+  color: #c0392b;
+  border: 1px solid #2a1010;
+  border-radius: 10px;
+  padding: 7px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  min-height: 38px;
+  -webkit-appearance: none;
+}
+#clearBtn:active { background: #c0392b; color: #fff; border-color: #c0392b; }
+
+/* Chat scroll area */
+#chatBox {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.empty-msg {
+  text-align: center;
+  padding: 70px 20px;
+  color: #282828;
+  font-size: 0.9rem;
+}
+
+/* Individual message */
+.msg {
+  padding: 10px 16px 10px;
+  border-bottom: 1px solid #0c0c0c;
+  cursor: pointer;
+  user-select: none;
+}
+.msg.open { background: #0d0d0d; }
+
+.msg-top {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 3px;
+}
+.msg-uid {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  flex-shrink: 0;
+}
+.msg-time {
+  font-size: 0.68rem;
+  color: #2a2a2a;
+}
+.msg-body {
+  font-size: 0.95rem;
+  color: #d8d8d8;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+/* Delete row — hidden until tapped */
+.msg-del {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #181818;
+}
+.msg-del.show { display: flex; }
+.del-label { font-size: 0.78rem; color: #555; }
+.del-btns  { display: flex; gap: 8px; }
+
+.btn-cancel {
+  background: #141414;
+  color: #555;
+  border: 1px solid #222;
+  border-radius: 9px;
+  padding: 8px 16px;
+  font-size: 0.82rem;
+  font-family: inherit;
+  cursor: pointer;
+  min-height: 36px;
+  -webkit-appearance: none;
+}
+.btn-cancel:active { background: #1e1e1e; }
+
+.btn-del {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  border-radius: 9px;
+  padding: 8px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  min-height: 36px;
+  -webkit-appearance: none;
+}
+.btn-del:active { background: #a93226; }
+</style>
+</head>
+<body>
+
+<!-- Auth gate -->
+<div id="auth">
+  <div id="auth-label">Alston Labs — Observer</div>
+  <input type="password" id="authPw" placeholder="passcode" autocomplete="off">
+  <button id="authBtn">Enter</button>
+  <div id="authErr">Incorrect passcode</div>
+</div>
+
+<!-- App -->
+<div id="app" class="gone">
+  <div id="hdr">
+    <div id="stats">
+      <div class="stat">
+        <span class="stat-val" id="msgCount">0</span>
+        <span class="stat-lbl">msgs</span>
+      </div>
+      <div class="stat">
+        <span class="stat-val" id="viewerCount">--</span>
+        <span class="stat-lbl">watching</span>
+      </div>
+    </div>
+    <button id="clearBtn">Clear All</button>
+  </div>
+  <div id="chatBox"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js';
+import { getFirestore, collection, query, orderBy, limit,
+         onSnapshot, getDocs, deleteDoc }
+  from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js';
+import { getDatabase, ref, onValue }
+  from 'https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js';
+
+const CONFIG = {
+  apiKey:            "AIzaSyB9qqa3Vw9oyjqTHBp20_eHS8uGCSE_ByY",
+  authDomain:        "dayswithdaniel-8ba59.firebaseapp.com",
+  projectId:         "dayswithdaniel-8ba59",
+  storageBucket:     "dayswithdaniel-8ba59.firebasestorage.app",
+  messagingSenderId: "812386772505",
+  appId:             "1:812386772505:web:d23bef3ce65cacfde66c88",
+  databaseURL:       "https://dayswithdaniel-8ba59-default-rtdb.firebaseio.com"
+};
+const PW      = "bradylebourveau123!";
+const AUTH_KEY = "obs_authed";
+
+/* ── Auth ─────────────────────────────────── */
+const authEl  = document.getElementById('auth');
+const appEl   = document.getElementById('app');
+const authPw  = document.getElementById('authPw');
+const authErr = document.getElementById('authErr');
+
+function unlock() {
+  localStorage.setItem(AUTH_KEY, '1');
+  authEl.classList.add('gone');
+  appEl.classList.remove('gone');
+  boot();
+}
+
+if (localStorage.getItem(AUTH_KEY) === '1') {
+  unlock();
+} else {
+  document.getElementById('authBtn').addEventListener('click', attempt);
+  authPw.addEventListener('keydown', e => { if (e.key === 'Enter') attempt(); });
+  // iOS: don't auto-focus (would pop keyboard on load)
+}
+
+function attempt() {
+  if (authPw.value === PW) {
+    unlock();
+  } else {
+    authErr.style.display = 'block';
+    authPw.value = '';
+    setTimeout(() => { authErr.style.display = 'none'; }, 2000);
+  }
+}
+
+/* ── Helpers ──────────────────────────────── */
+function uidColor(uid) {
+  // deterministic hue from uid string
+  let h = 0;
+  for (const c of (uid || '')) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return `hsl(${h % 360}, 65%, 62%)`;
+}
+
+function fmtTime(ts) {
+  if (!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+
+/* ── Boot ─────────────────────────────────── */
+function boot() {
+  const app  = initializeApp(CONFIG);
+  const db   = getFirestore(app);
+  const rtdb = getDatabase(app);
+
+  const box      = document.getElementById('chatBox');
+  const countEl  = document.getElementById('msgCount');
+  const watchEl  = document.getElementById('viewerCount');
+  let   openEl   = null;
+  let   firstRender = true;
+
+  /* Chat listener */
+  onSnapshot(
+    query(collection(db, 'chat'), orderBy('ts', 'asc'), limit(500)),
+    snap => {
+      const atBottom = firstRender ||
+        (box.scrollHeight - box.scrollTop - box.clientHeight < 100);
+      firstRender = false;
+      openEl = null;
+      box.innerHTML = '';
+
+      if (snap.empty) {
+        box.innerHTML = '<div class="empty-msg">No messages yet.</div>';
+        countEl.textContent = '0';
+        return;
+      }
+
+      snap.forEach(d => box.appendChild(makeMsg(d, db)));
+      countEl.textContent = snap.size;
+      if (atBottom) box.scrollTop = box.scrollHeight;
+    }
+  );
+
+  /* Viewer listener */
+  try {
+    onValue(ref(rtdb, 'viewers'), snap => {
+      watchEl.textContent = snap.exists() ? Object.keys(snap.val()).length : 0;
+    });
+  } catch(_) {}
+
+  /* Clear all */
+  document.getElementById('clearBtn').addEventListener('click', async () => {
+    if (!confirm('Delete ALL messages? This cannot be undone.')) return;
+    if (!confirm('Are you REALLY sure? Every message will be gone.')) return;
+    const snap = await getDocs(collection(db, 'chat'));
+    await Promise.all(snap.docs.map(d => deleteDoc(d.ref)));
+  });
+
+  /* Build a message element */
+  function makeMsg(d, db) {
+    const m   = d.data();
+    const el  = document.createElement('div');
+    el.className = 'msg';
+
+    const top  = document.createElement('div');
+    top.className = 'msg-top';
+
+    const uid = document.createElement('span');
+    uid.className  = 'msg-uid';
+    uid.style.color = uidColor(m.uid);
+    uid.textContent = m.uid || 'anon';
+
+    const time = document.createElement('span');
+    time.className  = 'msg-time';
+    time.textContent = fmtTime(m.ts);
+
+    top.append(uid, time);
+
+    const body = document.createElement('div');
+    body.className  = 'msg-body';
+    body.textContent = m.text || '';
+
+    const delRow = document.createElement('div');
+    delRow.className = 'msg-del';
+    delRow.innerHTML = `
+      <span class="del-label">Delete this message?</span>
+      <div class="del-btns">
+        <button class="btn-cancel">Cancel</button>
+        <button class="btn-del">Delete</button>
+      </div>`;
+
+    delRow.querySelector('.btn-cancel').addEventListener('click', ev => {
+      ev.stopPropagation();
+      collapse(el, delRow);
+    });
+    delRow.querySelector('.btn-del').addEventListener('click', async ev => {
+      ev.stopPropagation();
+      if (!confirm('Are you sure you want to delete this message?')) return;
+      await deleteDoc(d.ref);
+    });
+
+    el.append(top, body, delRow);
+
+    el.addEventListener('click', () => {
+      if (openEl && openEl !== el) {
+        openEl.classList.remove('open');
+        openEl.querySelector('.msg-del').classList.remove('show');
+      }
+      const isOpen = el.classList.contains('open');
+      el.classList.toggle('open', !isOpen);
+      delRow.classList.toggle('show', !isOpen);
+      openEl = isOpen ? null : el;
+    });
+
+    return el;
+  }
+
+  function collapse(el, delRow) {
+    el.classList.remove('open');
+    delRow.classList.remove('show');
+    if (openEl === el) openEl = null;
+  }
+}
+</script>
+</body>
+</html>
