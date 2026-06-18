@@ -848,8 +848,9 @@ function getOfflineState() {
 
   if (day < 5)   return 'STARTING';          // Mon–Thu: pre-event
   if (day === 5) {                            // Friday
-    if (h < 11)  return 'STARTING';
-    if (h < 23)  return 'AWAY';
+    if (h < 9.5)  return 'before';           // before 9:30 AM
+    if (h < 11)   return 'STARTING';
+    if (h < 23)   return 'AWAY';
     return 'SLEEPING';
   }
   if (day === 6) {                            // Saturday
